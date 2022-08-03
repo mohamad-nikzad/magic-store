@@ -1,12 +1,18 @@
+import { trpc } from "@/util/trpc";
 import type { NextPage } from "next";
 import { useState } from "react";
 
 const Home: NextPage = () => {
   const [instagram_id, setInstagram_id] = useState("");
+  const hello = trpc.useQuery(["hello", { text: "qwe" }]);
+  const test = trpc.useMutation(["get-instagram_id"]);
 
   const getId = () => {
-    console.log(instagram_id);
+    test.mutate(instagram_id);
+    // console.log(instagram_id);
   };
+
+  console.log(test?.data);
 
   return (
     <div className="w-full text-white relative flex flex-col items-center justify-center  h-screen bg-gradient-to-r from-[#ad5389] to-[#3c1053]">
@@ -16,11 +22,13 @@ const Home: NextPage = () => {
         </h1>
       </header>
       <div className="flex flex-col p-6  max-w-xl">
+        {/* {hello.data && <div>{hello?.data.greeting}</div>} */}
         <label htmlFor="instagram_id" className="font-medium font-mono">
           Enter Instagram id to see the Magic !
         </label>
         <input
           type="text"
+          disabled={hello.isLoading}
           name="instagram_id"
           value={instagram_id}
           onChange={(e) => setInstagram_id(e.target.value)}
