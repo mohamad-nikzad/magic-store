@@ -1,9 +1,16 @@
 import { trpc } from "@/util/trpc";
 import type { NextPage } from "next";
 import { useForm } from "react-hook-form";
+import clsx from "clsx";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
-  const accountId = trpc.useMutation(["get-instagram_id"]);
+  const router = useRouter();
+  const accountId = trpc.useMutation(["register"], {
+    onSuccess: (data) => {
+      router.push(`/store/${data.instagram_id}`);
+    },
+  });
   const { register, handleSubmit } = useForm();
 
   const onSubmit = (data: any) => {
@@ -12,8 +19,10 @@ const Home: NextPage = () => {
 
   console.log(accountId?.data);
 
+  // gradiend bg from-[#ad5389] to-[#3c1053]
+
   return (
-    <div className="w-full text-white relative flex flex-col items-center justify-center  h-screen bg-gradient-to-r from-[#ad5389] to-[#3c1053]">
+    <div className="w-full font-mono  relative flex flex-col items-center justify-center  h-screen from-base-100 to-base-300 bg-gradient-to-br">
       <header className="w-full p-6 fixed top-0">
         <h1 className="text-center text-4xl font-bold text-white font-mono">
           Magic Store
@@ -21,21 +30,30 @@ const Home: NextPage = () => {
       </header>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col p-6  max-w-xl"
+        className="p-6 form-control max-w-xl"
       >
-        <label htmlFor="instagram_id" className="font-medium font-mono">
-          Enter Instagram id to see the Magic !
+        <label htmlFor="instagram_id" className="label">
+          <span className="label-text font-bold text-xl">
+            Enter Instagram id to see the Magic !
+          </span>
         </label>
         <input
           type="text"
           id="instagram_id"
+          disabled={accountId.isLoading}
           {...register("instagram_id", { required: true })}
-          className="p-2 rounded-lg w-96 mt-2 text-slate-900"
+          className="input input-bordered input-primary mt-2 w-[500px]"
           placeholder="ex:@mrdante"
         />
         <button
+          disabled={accountId.isLoading}
           type="submit"
-          className="flex font-mono mx-auto mt-6 text-white  bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+          className={clsx(
+            "btn btn-primary mt-4 max-w-[80%] mx-auto text-lg capitalize",
+            {
+              loading: accountId.isLoading,
+            }
+          )}
         >
           start magic
         </button>

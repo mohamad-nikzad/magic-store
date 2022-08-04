@@ -1,27 +1,32 @@
+import prisma from "@/util/prisma";
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { z } from "zod";
 
 export const appRouter = trpc
   .router()
-  .query("hello", {
-    input: z
-      .object({
-        text: z.string().nullish(),
-      })
-      .nullish(),
-    resolve({ input }) {
+  .query("get-user", {
+    input: z.string(),
+    async resolve({ input }) {
+      const user = await prisma.user.findUnique({
+        where: {
+          instagram_id: input,
+        },
+      });
       return {
-        greeting: `hello ${input?.text ?? "world"}`,
+        user,
       };
     },
   })
-  .mutation("get-instagram_id", {
+  .mutation("register", {
     input: z.string(),
-    resolve({ input }) {
-      return {
-        instagram_id: input,
-      };
+    async resolve({ input }) {
+      const user = await prisma.user.create({
+        data: {
+          instagram_id: input,
+        },
+      });
+      return user;
     },
   });
 
