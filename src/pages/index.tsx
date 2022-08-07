@@ -6,9 +6,9 @@ import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const accountId = trpc.useMutation(["register"], {
+  const accountId = trpc.useMutation("account-check", {
     onSuccess: (data) => {
-      router.push(`/store/${data.instagram_id}`);
+      router.push(`/store/${data}`);
     },
   });
   const { register, handleSubmit } = useForm();
