@@ -8,7 +8,7 @@ const Home: NextPage = () => {
   const router = useRouter();
   const accountId = trpc.useMutation("account-check", {
     onSuccess: (data) => {
-      router.push(`/store/${data}`);
+      router.push(`/store/preview/${data}`);
     },
   });
   const { register, handleSubmit } = useForm();

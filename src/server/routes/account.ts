@@ -1,6 +1,5 @@
 import prisma from "@/util/prisma";
 import * as trpc from "@trpc/server";
-import { create } from "domain";
 import { z } from "zod";
 
 export const accountRouter = trpc
@@ -19,13 +18,13 @@ export const accountRouter = trpc
         const newAccount = await prisma.account.create({
           data: {
             instagram_id: input,
-            products: {
-              create: fetchedProducts?.map((item: any) => ({
-                title: item.title,
-                thumbnail_url: item.image,
-                description: item.description,
-                price: item.price || null,
-              })),
+            previewProducts: {
+              createMany: {
+                data: fetchedProducts?.map((item: any) => ({
+                  title: item.title,
+                  thumbnail_url: item.image,
+                })),
+              },
             },
           },
         });
@@ -43,7 +42,7 @@ export const accountRouter = trpc
           instagram_id: input,
         },
         include: {
-          products: true,
+          previewProducts: true,
         },
       });
       return account;

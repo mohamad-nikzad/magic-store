@@ -11,10 +11,10 @@ datasource db {
 }
 
 model Account {
-  instagram_id String    @unique
-  products     Product[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  instagram_id    String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  previewProducts previewProduct[]
 }
 
 model User {
@@ -27,16 +27,25 @@ model User {
   updatedAt    DateTime  @updatedAt
 }
 
-model Product {
+model previewProduct {
   id                  Int      @id @unique @default(autoincrement())
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
   title               String
-  description         String?
-  price               Float?
   thumbnail_url       String?
   Account             Account? @relation(fields: [accountInstagram_id], references: [instagram_id])
   accountInstagram_id String?
-  User                User?    @relation(fields: [userId], references: [id])
-  userId              Int?
+
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id            Int     @id @unique @default(autoincrement())
+  title         String
+  description   String?
+  price         Float?
+  thumbnail_url String?
+  User          User?   @relation(fields: [userId], references: [id])
+  userId        Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
