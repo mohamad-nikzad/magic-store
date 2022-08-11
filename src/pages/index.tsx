@@ -95,8 +95,8 @@ const Home: NextPage = () => {
         <form
           className="form-control pb-4"
           onSubmit={submit(loginHandler)}
-          autoComplete="off"
-          autoSave="off"
+          autoComplete="false"
+          autoSave="false"
         >
           <label htmlFor="instagram_id" className="label">
             <span className="label-text font-bold ">Phonenumber</span>
@@ -115,6 +115,7 @@ const Home: NextPage = () => {
           <input
             type="password"
             id="password"
+            autoComplete="new-password"
             disabled={loginUser.isLoading}
             {...register2("password", { required: true })}
             className="input "

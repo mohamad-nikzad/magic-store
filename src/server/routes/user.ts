@@ -1,5 +1,5 @@
 import prisma from "@/util/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createRouter } from "../createRouter";
@@ -73,11 +73,11 @@ export const userRouter = createRouter()
     async resolve({ input, ctx }) {
       const { req, res } = ctx;
       try {
-        const user = await prisma.user.findUnique({
+        const user = (await prisma.user.findUnique({
           where: {
             phonenumber: input.phonenumber,
           },
-        });
+        })) as User;
         if (!user)
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -116,18 +116,51 @@ export const userRouter = createRouter()
       if (!ctx.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-      const user = await prisma.user.findUnique({
+      try {
+        const user = await prisma.user.findUnique({
+          where: {
+            id: ctx.user.id,
+          },
+          include: {
+            products: {
+              orderBy: {
+                updatedAt: "desc",
+              },
+            },
+          },
+        });
+        if (!user)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+          });
+        const { password, ...info } = user;
+        return info;
+      } catch (error) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+    },
+  })
+  .mutation("update", {
+    input: z.object({
+      username: z.string().nullish(),
+    }),
+    async resolve({ input, ctx }) {
+      console.log("qwe");
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      const user = await prisma.user.update({
         where: {
           id: ctx.user.id,
         },
-        include: {
-          products: {
-            orderBy: {
-              updatedAt: "desc",
-            },
-          },
+        data: {
+          username: input.username,
         },
       });
-      return user;
+      return {
+        status: "success",
+      };
     },
   });

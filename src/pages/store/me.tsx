@@ -6,11 +6,9 @@ import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import { ElementRef, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { setCookie } from "cookies-next";
-import { router } from "@trpc/server";
+import { removeCookies } from "cookies-next";
 
 const productSchema = z.object({
   title: z.string(),
@@ -38,10 +36,17 @@ const Store: NextPage = () => {
   const util = trpc.useContext();
   const modalRef = useRef<ElementRef<typeof Dialog>>(null);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [username, setUsername] = useState("");
 
   const { register, unregister, handleSubmit } = useForm({
     resolver: zodResolver(productSchema),
   });
+
+  const {
+    register: register2,
+    unregister: unregister2,
+    handleSubmit: handleSubmit2,
+  } = useForm();
 
   const user = trpc.useQuery(["user-get"], { enabled: true });
   const product = trpc.useMutation("product-update", {
@@ -50,6 +55,16 @@ const Store: NextPage = () => {
       modalRef.current && modalRef.current.close();
       setCurrentProduct(null);
       unregister();
+    },
+  });
+
+  const updateUsername = trpc.useMutation("user-update", {
+    onSuccess: (data) => {
+      console.log(data);
+      util.invalidateQueries(["user-get"]);
+      modalRef.current && modalRef.current.close();
+      setUsername("");
+      unregister2();
     },
   });
 
@@ -62,16 +77,40 @@ const Store: NextPage = () => {
     currentProduct && product.mutate({ product_id: currentProduct.id, data });
   };
 
+  const updateUsernameHandler = (data: any) => {
+    username && updateUsername.mutate({ username: data.username });
+  };
+
   const logoutHandler = async () => {
-    await setCookie("access_token", null);
+    removeCookies("access_token");
     router.push("/");
   };
+
+  const closeModalHandler = () => {
+    currentProduct !== null && setCurrentProduct(null);
+    username !== "" && setUsername("");
+    unregister();
+  };
+
+  const openChangeUsernameModal = () => {
+    user.data &&
+      setUsername(user.data.username || user.data.instagram_id || "");
+    modalRef.current && modalRef.current.open();
+  };
+
+  console.log(user.data);
 
   return (
     <div className="w-full font-mono  relative min-h-screen from-base-100 to-base-300 bg-gradient-to-br">
       <div className="navbar justify-between px-4 bg-base-300 shadow top-0 sticky z-10">
-        <div className="indicator">
-          <div className="indicator-item indicator-bottom">
+        <div>
+          <h1 className="text-xl px-3">
+            {user.data?.username || user.data?.instagram_id || "site name"}
+          </h1>
+          <button
+            className="btn btn-square btn-ghost"
+            onClick={openChangeUsernameModal}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4 text-yellow-600"
@@ -86,8 +125,7 @@ const Store: NextPage = () => {
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
               />
             </svg>
-          </div>
-          <a className="text-xl px-3">{user.data?.phonenumber}</a>
+          </button>
         </div>
         <button className="btn btn-outline btn-error" onClick={logoutHandler}>
           Logout
@@ -146,13 +184,10 @@ const Store: NextPage = () => {
         </div>
       </div>
       <Dialog
-        title="Update product"
+        title={currentProduct ? "Update product" : "update site title"}
         containerClassName="bg-base-300 !h-fit shadow shadow-purple-900"
         ref={modalRef}
-        onClose={() => {
-          setCurrentProduct(null);
-          unregister();
-        }}
+        onClose={closeModalHandler}
       >
         {currentProduct && (
           <form
@@ -208,6 +243,30 @@ const Store: NextPage = () => {
               className="btn btn-primary mt-4"
               type="submit"
               disabled={product.isLoading}
+            >
+              update
+            </button>
+          </form>
+        )}
+        {username && (
+          <form
+            className="form-control pb-6"
+            onSubmit={handleSubmit2(updateUsernameHandler)}
+          >
+            <label htmlFor="username">
+              <span className="label">site name</span>
+            </label>
+            <input
+              type="text"
+              {...register2("username")}
+              className="input input-primary"
+              placeholder="enter site name"
+              defaultValue={username}
+            />
+            <button
+              className="btn btn-primary mt-4"
+              type="submit"
+              disabled={updateUsername.isLoading}
             >
               update
             </button>
