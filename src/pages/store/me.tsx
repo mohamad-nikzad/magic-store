@@ -2,16 +2,17 @@
 import { Dialog } from "@/components";
 import { trpc } from "@/util/trpc";
 import { Product } from "@prisma/client";
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import { ElementRef, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { setCookie } from "cookies-next";
+import { router } from "@trpc/server";
 
 const productSchema = z.object({
-  // id: z.number(),
   title: z.string(),
   description: z.string().nullable(),
   price: z
@@ -20,25 +21,32 @@ const productSchema = z.object({
     .nullish(),
 });
 
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  if (!req.cookies.access_token) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/",
+      },
+    };
+  }
+  return { props: {} };
+};
+
 const Store: NextPage = () => {
-  const id = useRouter().query.id as string;
+  const router = useRouter();
   const util = trpc.useContext();
   const modalRef = useRef<ElementRef<typeof Dialog>>(null);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
 
-  const {
-    register,
-    unregister,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { register, unregister, handleSubmit } = useForm({
     resolver: zodResolver(productSchema),
   });
 
-  const user = trpc.useQuery(["user-get", +id], { enabled: true });
+  const user = trpc.useQuery(["user-get"], { enabled: true });
   const product = trpc.useMutation("product-update", {
     onSuccess: (data) => {
-      util.invalidateQueries(["user-get", +id]);
+      util.invalidateQueries(["user-get"]);
       modalRef.current && modalRef.current.close();
       setCurrentProduct(null);
       unregister();
@@ -51,15 +59,17 @@ const Store: NextPage = () => {
   };
 
   const updateProductHandler = (data: any) => {
-    console.log(data);
     currentProduct && product.mutate({ product_id: currentProduct.id, data });
   };
 
-  console.log(currentProduct);
+  const logoutHandler = async () => {
+    await setCookie("access_token", null);
+    router.push("/");
+  };
 
   return (
     <div className="w-full font-mono  relative min-h-screen from-base-100 to-base-300 bg-gradient-to-br">
-      <div className="navbar justify-between bg-base-300 shadow top-0 sticky z-10">
+      <div className="navbar justify-between px-4 bg-base-300 shadow top-0 sticky z-10">
         <div className="indicator">
           <div className="indicator-item indicator-bottom">
             <svg
@@ -77,8 +87,11 @@ const Store: NextPage = () => {
               />
             </svg>
           </div>
-          <a className="text-xl px-3">{user.data?.instagram_id || id}</a>
+          <a className="text-xl px-3">{user.data?.phonenumber}</a>
         </div>
+        <button className="btn btn-outline btn-error" onClick={logoutHandler}>
+          Logout
+        </button>
       </div>
       <div className="container p-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">

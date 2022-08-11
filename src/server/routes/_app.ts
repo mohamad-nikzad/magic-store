@@ -1,10 +1,9 @@
-import * as trpc from "@trpc/server";
+import { createRouter } from "../createRouter";
 import { accountRouter } from "./account";
 import { productRouter } from "./product";
 import { userRouter } from "./user";
 
-export const appRouter = trpc
-  .router()
+export const appRouter = createRouter()
   .query("healthz", {
     async resolve() {
       return "yay!";

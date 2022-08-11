@@ -1,20 +1,19 @@
 import prisma from "@/util/prisma";
-import * as trpc from "@trpc/server";
 import { z } from "zod";
+import { createRouter } from "../createRouter";
 
 export const productSchema = z.object({
-  // id: z.number(),
   title: z.string(),
   description: z.string().nullable(),
   price: z.number().nullish(),
 });
 
-export const productRouter = trpc.router().mutation("update", {
+export const productRouter = createRouter().mutation("update", {
   input: z.object({
     product_id: z.number({ required_error: "product_id is required" }),
     data: productSchema,
   }),
-  async resolve({ input }) {
+  async resolve({ input, ctx }) {
     try {
       const updatedProduct = await prisma.product.update({
         where: {

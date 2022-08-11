@@ -18,6 +18,9 @@ export default withTRPC<AppRouter>({
       : "http://localhost:3000/api/trpc";
 
     return {
+      // headers() {
+      //   return { Authorization: 'test' };
+      // },
       url,
       /**
        * @link https://react-query-v3.tanstack.com/reference/QueryClient

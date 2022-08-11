@@ -2,6 +2,7 @@
 import { Dialog } from "@/components";
 import { trpc } from "@/util/trpc";
 import { previewProduct } from "@prisma/client";
+import { router } from "@trpc/server";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { ElementRef, useEffect, useRef } from "react";
@@ -21,7 +22,7 @@ const Store: NextPage = () => {
   const registerUser = trpc.useMutation("user-register", {
     onSuccess: (data) => {
       modalRef.current && modalRef.current.close();
-      push(`/store/edit/${data.id}`);
+      data.access_token && push("/store/me");
     },
   });
 
@@ -31,7 +32,8 @@ const Store: NextPage = () => {
 
   const registerHandler = (data: any) => {
     registerUser.mutate({
-      phonenumber: +data.phonenumber,
+      phonenumber: data.phonenumber,
+      password: data.password,
       instagram_id: store,
     });
   };
@@ -134,6 +136,17 @@ const Store: NextPage = () => {
             {...register("phonenumber", { required: true })}
             className="input input-bordered input-primary"
             placeholder="enter your phonenumber"
+          />
+          <label htmlFor="password" className="label">
+            <span className="label-text font-bold ">Password</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            disabled={registerUser.isLoading}
+            {...register("password", { required: true })}
+            className="input input-bordered input-primary"
+            placeholder="enter your password"
           />
           <button
             className="btn btn-primary mt-4"

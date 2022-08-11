@@ -19,10 +19,11 @@ model Account {
 
 model User {
   id           Int       @id @unique @default(autoincrement())
-  phonenumber  Int?      @unique
+  phonenumber  String?   @unique
   instagram_id String
   username     String?
   products     Product[]
+  password     String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }

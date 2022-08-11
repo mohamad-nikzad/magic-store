@@ -1,9 +1,9 @@
 import prisma from "@/util/prisma";
-import * as trpc from "@trpc/server";
+import { getCookie } from "cookies-next";
 import { z } from "zod";
+import { createRouter } from "../createRouter";
 
-export const accountRouter = trpc
-  .router()
+export const accountRouter = createRouter()
   .mutation("check", {
     input: z.string(),
     async resolve({ input }) {
@@ -28,7 +28,6 @@ export const accountRouter = trpc
             },
           },
         });
-        console.log(newAccount, "new account");
         return input;
       }
       return input;
