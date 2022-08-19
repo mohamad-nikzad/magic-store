@@ -84,13 +84,11 @@ const Store: NextPage = () => {
                 className="card p-2 card-compact bg-base-100 shadow-sm border-2 border-purple-900 shadow-purple-900"
                 key={product.id}
               >
-                <figure>
-                  <img
+                <img
                     className="rounded-xl object-contain h-60 w-auto"
                     src={product.thumbnail_url || ""}
-                    alt={product.title}
+                    alt="image"
                   />
-                </figure>
                 <div className="card-body">
                   <h2 className="card-title line-clamp-2">{product.title}</h2>
                   <div className="card-actions justify-end">
