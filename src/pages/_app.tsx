@@ -1,10 +1,16 @@
 import { AppRouter } from "@/server/routes/_app";
-import "@/styles/globals.css";
+import "@/assets/styles/globals.css";
 import { withTRPC } from "@trpc/next";
 import { AppType } from "next/dist/shared/lib/utils";
+import ManagedModal from "@/container/ui/modal/managed-modal";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Component {...pageProps} />
+      <ManagedModal />
+    </>
+  );
 };
 
 export default withTRPC<AppRouter>({

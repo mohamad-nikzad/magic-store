@@ -4,11 +4,14 @@ import { trpc } from "@/util/trpc";
 import { Product } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
-import { ElementRef, useRef, useState } from "react";
+import { ElementRef, FC, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { removeCookies } from "cookies-next";
+import Image from "next/image";
+import Card from "@/components/card/product/classic";
+import HorizontalCard from "@/components/card/product/horizontal";
 
 const productSchema = z.object({
   title: z.string(),
@@ -101,7 +104,7 @@ const Store: NextPage = () => {
   console.log(user.data);
 
   return (
-    <div className="w-full font-mono  relative min-h-screen from-base-100 to-base-300 bg-gradient-to-br">
+    <div className="w-full   relative min-h-screen from-base-100 to-base-300 bg-gradient-to-br">
       <div className="navbar justify-between px-4 bg-base-300 shadow top-0 sticky z-10">
         <div>
           <h1 className="text-xl px-3">
@@ -128,58 +131,20 @@ const Store: NextPage = () => {
           </button>
         </div>
         <button className="btn btn-outline btn-error" onClick={logoutHandler}>
-          Logout
+          خروج
         </button>
       </div>
-      <div className="container p-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="container p-4 md:p-6 mx-auto">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {user?.data?.products &&
-            user.data?.products.map((product: Product) => (
-              <div
-                className="card p-2 card-compact bg-base-100 shadow-sm border-2 border-purple-900 shadow-purple-900"
-                key={product.id}
-              >
-                <figure>
-                  <img
-                    className="rounded-xl object-contain h-60 w-auto"
-                    src={product.thumbnail_url || ""}
-                    alt={product.title}
-                  />
-                </figure>
-                <div className="card-body">
-                  <h2 className="card-title line-clamp-2">{product.title}</h2>
-                  {product.description && (
-                    <p className="text-sm">{product.description}</p>
-                  )}
-                  {product.price && (
-                    <span className="text-base font-semibold">
-                      {product.price}$
-                    </span>
-                  )}
-                  <div className="card-actions justify-end">
-                    <button
-                      className="btn btn-primary gap-1 btn-sm mx-auto"
-                      onClick={() => openModalHandler(product)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                      Edit
-                    </button>
-                  </div>
-                </div>
-              </div>
+            user.data?.products.map((product: Product, index: number) => (
+              <Card product={product} key={index} />
+            ))}
+        </div> */}
+        <div className="grid grid-cols-1 gap-5 max-w-4xl mx-auto">
+          {user?.data?.products &&
+            user.data?.products.map((product: Product, index: number) => (
+              <HorizontalCard product={product} key={index} />
             ))}
         </div>
       </div>
